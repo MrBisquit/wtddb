@@ -3,6 +3,7 @@
 
 #include <stdint.h> // For things like uint64_t
 #include <stdio.h>  // For FILE
+#include <getline.h> // For ssize_t
 //#include <ansi_console_v2.h> // For ANSI colours
 
 // Definitions
@@ -95,5 +96,15 @@ int  wtddb_db_status(db_t* db);
 // Conversion functions
 db_metadata_t wtddb_c_db_md_ftm(struct db_metadata data); // File -> Memory
 struct db_metadata wtddb_c_db_md_mtf(db_metadata_t data); // Memory -> File
+
+// REPL structures and functions
+typedef struct {
+    char* buffer;
+    size_t buffer_length;
+    ssize_t input_length;
+} repl_buffer_t;
+
+repl_buffer_t* repl_new_buffer();
+void repl_read_input(repl_buffer_t* buffer);
 
 #endif // WTDDB_DB_H

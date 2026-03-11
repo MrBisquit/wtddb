@@ -49,6 +49,9 @@ void wtddb_open_db(const char* path, db_t* db) {
         // memory
         return;
     }
+
+    // Convert the file data to memory data
+    db->metadata = wtddb_c_db_md_ftm(tmp_metadata);
 }
 
 void wtddb_close_db(db_t* db) {

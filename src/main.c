@@ -1,4 +1,3 @@
-#include <stdio.h>
 #include <wtddb/db.h>
 
 // Could just do const char** argv, but this looks cooler
@@ -26,4 +25,16 @@ int main(int argc, char* const argv[]) {
     // Open the database
     db_t* db = NULL;
     wtddb_open_db(argv[1], db);
+
+    // Parse any other arguments
+
+    // Nothing to do, so start REPL (Read Eval Print Loop), commonly used in databases
+    // such as sqlite
+
+    repl_buffer_t* input_buffer = repl_new_buffer(input_buffer);
+
+    while(1) {
+        printf("wtddb> ");
+        repl_read_input(input_buffer);
+    }
 }

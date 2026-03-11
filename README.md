@@ -9,3 +9,6 @@ On windows, use `build.bat`, on linux, use `build.sh`. There are instructions at
 You will need `vcpkg` to build.
 After building, the executable should *magically* appear in the `bin` directory, unless it doesn't, and
 in which case it probably didn't compile.
+
+## Useful links
+https://cstack.github.io/db_tutorial/parts/part1.html
