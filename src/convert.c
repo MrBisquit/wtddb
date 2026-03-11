@@ -1,5 +1,7 @@
 #include <wtddb/db.h>
 
+// All these do is convert between the file versions, and the memory versions
+
 db_metadata_t wtddb_c_db_md_ftm(struct db_metadata data) {
     db_metadata_t tmp = {
         data.db_ver,
