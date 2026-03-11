@@ -31,7 +31,10 @@ int main(int argc, char* const argv[]) {
     // Nothing to do, so start REPL (Read Eval Print Loop), commonly used in databases
     // such as sqlite
 
-    repl_buffer_t* input_buffer = repl_new_buffer(input_buffer);
+    repl_buffer_t* input_buffer = repl_new_buffer();
+    if(input_buffer == NULL) {
+        WTDDB_CRITICAL("Failed to allocate memory for REPL", "");
+    }
 
     while(1) {
         printf("wtddb> ");

@@ -4,6 +4,8 @@
 
 repl_buffer_t* repl_new_buffer() {
     repl_buffer_t* buffer = malloc(sizeof(repl_buffer_t));
+    if(!buffer) return NULL;
+
     buffer->buffer = NULL;
     buffer->buffer_length = 0;
     buffer->input_length = 0;
