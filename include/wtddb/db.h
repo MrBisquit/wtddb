@@ -21,7 +21,7 @@
 #define WTDDB_ERROR(fmt, ...) \
     do { printf("\x1B[91merror:\033[0m " fmt "\n", __VA_ARGS__); } while(0)
 #define WTDDB_CRITICAL(fmt, ...) \
-    do { printf("\x1B[31mcritical:\033[0m " fmt "\n", __VA_ARGS__); } while(0)
+    do { printf("\x1B[31mcrit:\033[0m " fmt "\n", __VA_ARGS__); } while(0)
 
 // Basic file structure (different from data)
 // These are basically squished together, which is NOT optimal for memory,
@@ -91,5 +91,9 @@ void wtddb_push_db(db_t* db);
 // Get the status of the database
 // If this is anything other than 0, the db is not ready
 int  wtddb_db_status(db_t* db);
+
+// Conversion functions
+db_metadata_t wtddb_c_db_md_ftm(struct db_metadata data); // File -> Memory
+struct db_metadata wtddb_c_db_md_mtf(db_metadata_t data); // Memory -> File
 
 #endif // WTDDB_DB_H

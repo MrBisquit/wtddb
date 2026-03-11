@@ -13,6 +13,8 @@
 void wtddb_create_db(db_t* db) {
     // Assume the db is in fact NOT a NULL pointer
 
+    WTDDB_INFO("The database did not exist, so it has been created", "");
+
     // Sets the db->metadata.db_ver value to be what ever the WTDDB_DB_VER
     // is currently set to, this will be important later for versioning
     db->metadata.db_ver = WTDDB_DB_VER;
@@ -33,11 +35,13 @@ void wtddb_open_db(const char* path, db_t* db) {
     // Now to actually load the contents
     fseek(db->stream, 0, SEEK_SET); // Send to beginning
 
+    size_t read = 0;
+
     struct db_metadata tmp_metadata;
-    fread(&tmp_metadata, sizeof(struct db_metadata), 1, db->stream);
+    read = fread(&tmp_metadata, sizeof(struct db_metadata), 1, db->stream);
 
     // Before we go any further, check if tmp_metadata.db_ver is 0
-    if(tmp_metadata.db_ver == 0) {
+    if(tmp_metadata.db_ver == 0 || read == 0) {
         // The database isn't set up
         wtddb_create_db(db);
 
@@ -68,8 +72,11 @@ void wtddb_push_db(db_t* db) {
     // Write out headers
     fseek(db->stream, 0, SEEK_SET); // Send to beginning
 
+    // Convert the metadata first
+    struct db_metadata tmp_metadata = wtddb_c_db_md_mtf(db->metadata);
+
     // Write the db metadata
-    fwrite(&db->metadata, sizeof(db->metadata), 1, db->stream);
+    fwrite(&tmp_metadata, sizeof(tmp_metadata), 1, db->stream);
 }
 
 int wtddb_db_status(db_t* db) {

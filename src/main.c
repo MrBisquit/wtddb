@@ -22,4 +22,8 @@ int main(int argc, char* const argv[]) {
 
         return 1;
     }
+
+    // Open the database
+    db_t* db = NULL;
+    wtddb_open_db(argv[1], db);
 }
