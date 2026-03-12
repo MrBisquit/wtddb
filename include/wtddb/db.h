@@ -40,6 +40,12 @@ struct db_metadata {
     uintptr_t table_begin;  // Table data begin
 };
 
+struct db_config {
+    // Bit packing in C, the ": 1" here means only take up 1 bit
+    // Journals basically allow you to recover from mistakes, or corruptions
+    uint8_t write_journal : 1;
+};
+
 struct db_index_metadata {
     uintptr_t table_begin;  // The actual hashtable for each data table
 };
@@ -64,6 +70,10 @@ typedef struct db_metadata_t {
     uintptr_t table_begin;
 } db_metadata_t;
 
+typedef struct db_config_t {
+    uint8_t write_journal;
+} db_config_t;
+
 typedef struct db_index_metadata_t {
     uintptr_t table_begin;
 } db_index_metadata_t;
@@ -78,6 +88,7 @@ typedef struct db_t {
     FILE* stream;
 
     db_metadata_t metadata;
+    db_config_t config;
 } db_t;
 
 // Functions
@@ -88,14 +99,19 @@ void wtddb_open_db(const char* path, db_t* db);
 // Close the database
 void wtddb_close_db(db_t* db);
 // Push metadata changes to the file
-void wtddb_push_db(db_t* db);
+int  wtddb_push_db(db_t* db);
 // Get the status of the database
 // If this is anything other than 0, the db is not ready
 int  wtddb_db_status(db_t* db);
 
 // Conversion functions
+// DB metadata
 db_metadata_t wtddb_c_db_md_ftm(struct db_metadata data); // File -> Memory
 struct db_metadata wtddb_c_db_md_mtf(db_metadata_t data); // Memory -> File
+
+// DB config
+db_config_t wtddb_c_db_c_ftm(struct db_config data); // File -> Memory
+struct db_config wtddb_c_db_c_mtf(db_config_t data); // Memory -> File
 
 // REPL structures and functions
 typedef struct {
@@ -106,5 +122,6 @@ typedef struct {
 
 repl_buffer_t* repl_new_buffer();
 void repl_read_input(repl_buffer_t* buffer);
+void repl_dump_db(db_t* db);
 
 #endif // WTDDB_DB_H

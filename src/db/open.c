@@ -18,6 +18,7 @@ void wtddb_create_db(db_t* db) {
     // Sets the db->metadata.db_ver value to be what ever the WTDDB_DB_VER
     // is currently set to, this will be important later for versioning
     db->metadata.db_ver = WTDDB_DB_VER;
+    db->config.write_journal = 1;
 
     // Push the changes to the file
     wtddb_push_db(db);
@@ -68,18 +69,49 @@ void wtddb_close_db(db_t* db) {
     free(db); // The variable db is NULL at this point
 }
 
-void wtddb_push_db(db_t* db) {
+int wtddb_push_db(db_t* db) {
     // This doesn't actually write out ALL of the metadata, only the main
     // chunks, like the whole db metadata
 
+    if(db->stream == NULL) {
+        WTDDB_CRITICAL("The database file is not open", "");
+
+        return 1;
+    }
+
     // Write out headers
     fseek(db->stream, 0, SEEK_SET); // Send to beginning
+
+    size_t write_total = 0;
+    size_t write = 0;
 
     // Convert the metadata first
     struct db_metadata tmp_metadata = wtddb_c_db_md_mtf(db->metadata);
 
     // Write the db metadata
-    fwrite(&tmp_metadata, sizeof(tmp_metadata), 1, db->stream);
+    write = fwrite(&tmp_metadata, sizeof(struct db_metadata), 1, db->stream);
+    write_total += write;
+    if(write == 0 || write != sizeof(struct db_metadata)) {
+        WTDDB_CRITICAL("Failed to write to database file, the database is now corrupted", "");
+
+        return 1;
+    }
+
+    // Convert the config next
+    struct db_config tmp_config = wtddb_c_db_c_mtf(db->config);
+
+    // Write the db config
+    write = fwrite(&tmp_config, sizeof(struct db_config), 1, db->stream);
+    write_total += write;
+    if(write == 0 || write != sizeof(struct db_config)) {
+        WTDDB_CRITICAL("Failed to write to database file, the database is now corrupted", "");
+
+        return 1;
+    }
+
+    WTDDB_INFO("Wrote %zd bytes", write_total);
+
+    return 0;
 }
 
 int wtddb_db_status(db_t* db) {

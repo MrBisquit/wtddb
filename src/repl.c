@@ -25,3 +25,9 @@ void repl_read_input(repl_buffer_t* buffer) {
     buffer->input_length = read - 1;
     buffer->buffer[read - 1] = 0;
 }
+
+void repl_dump_db(db_t* db) {
+    printf("======== Begin database dump ========\n");
+
+    printf("\n========  End database dump  ========\n");
+}

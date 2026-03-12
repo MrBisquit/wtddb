@@ -1,3 +1,4 @@
+#include <string.h>
 #include <wtddb/db.h>
 
 // Could just do const char** argv, but this looks cooler
@@ -36,8 +37,21 @@ int main(int argc, char* const argv[]) {
         WTDDB_CRITICAL("Failed to allocate memory for REPL", "");
     }
 
+    return 0;
+    
     while(1) {
         printf("wtddb> ");
         repl_read_input(input_buffer);
+
+        if(strcmp(input_buffer->buffer, ".exit") == 0) {
+            WTDDB_INFO("Closing database", "");
+            wtddb_close_db(db);
+
+            exit(0);
+        } else if(strcmp(input_buffer->buffer, ".info") == 0) {
+            WTDDB_INFO("Dumping database information\n", "");
+
+            repl_dump_db(db);
+        }
     }
 }
