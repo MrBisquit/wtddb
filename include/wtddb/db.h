@@ -43,7 +43,11 @@ struct db_metadata {
 struct db_config {
     // Bit packing in C, the ": 1" here means only take up 1 bit
     // Journals basically allow you to recover from mistakes, or corruptions
-    uint8_t write_journal : 1;
+    // This simply writes to the same path, but with an additional ".jrnl" at the end,
+    // this file will be deleted, or may be left depending on the below options
+    uint8_t write_journal   : 1;
+    uint8_t delete_journal  : 1;
+    uint8_t clear_journal   : 1;
 };
 
 struct db_index_metadata {
@@ -53,6 +57,20 @@ struct db_index_metadata {
 struct db_table_metadata {
     char name[WTDDB_DB_MAX_TABLE_NAME_LENGTH];
     uint32_t num_columns; // Might need 64-bit in the future
+};
+
+struct db_schema_metadata {
+    uint32_t total_schemas;
+};
+
+struct db_index_metadata {
+    uint32_t total_indexes; // At least 1 index per table
+};
+
+// Technically there's metadata for each table, and this is just the overall
+// metadata, providing links to all of the tables
+struct db_tables_metadata {
+    uint32_t total_tables;
 };
 
 #pragma pack(pop)
@@ -72,6 +90,8 @@ typedef struct db_metadata_t {
 
 typedef struct db_config_t {
     uint8_t write_journal;
+    uint8_t delete_journal;
+    uint8_t clear_journal;
 } db_config_t;
 
 typedef struct db_index_metadata_t {
@@ -95,7 +115,7 @@ typedef struct db_t {
 // Create the database
 void wtddb_create_db(db_t* db);
 // Open the database
-void wtddb_open_db(const char* path, db_t* db);
+void wtddb_open_db(const char* path, db_t** db);
 // Close the database
 void wtddb_close_db(db_t* db);
 // Push metadata changes to the file

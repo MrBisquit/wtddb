@@ -25,7 +25,7 @@ int main(int argc, char* const argv[]) {
 
     // Open the database
     db_t* db = NULL;
-    wtddb_open_db(argv[1], db);
+    wtddb_open_db(argv[1], &db);
 
     // Parse any other arguments
 
@@ -37,21 +37,23 @@ int main(int argc, char* const argv[]) {
         WTDDB_CRITICAL("Failed to allocate memory for REPL", "");
     }
 
-    return 0;
-    
     while(1) {
         printf("wtddb> ");
         repl_read_input(input_buffer);
 
-        if(strcmp(input_buffer->buffer, ".exit") == 0) {
-            WTDDB_INFO("Closing database", "");
-            wtddb_close_db(db);
+        if(input_buffer->buffer[0] == '.') {
+            if(strcmp(input_buffer->buffer, ".exit") == 0) {
+                break;
+            } else if(strcmp(input_buffer->buffer, ".info") == 0) {
+                WTDDB_INFO("Dumping database information\n", "");
 
-            exit(0);
-        } else if(strcmp(input_buffer->buffer, ".info") == 0) {
-            WTDDB_INFO("Dumping database information\n", "");
-
-            repl_dump_db(db);
+                repl_dump_db(db);
+            } else {
+                WTDDB_ERROR("Unrecognised command \"%s\"", input_buffer->buffer);
+            }
         }
     }
+
+    WTDDB_INFO("Closing database", "");
+    wtddb_close_db(db);
 }

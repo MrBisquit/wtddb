@@ -34,7 +34,9 @@ struct db_metadata wtddb_c_db_md_mtf(db_metadata_t data) {
 // DB config
 db_config_t wtddb_c_db_c_ftm(struct db_config data) {
     db_config_t tmp = {
-        data.write_journal
+        data.write_journal,
+        data.delete_journal,
+        data.clear_journal
     };
 
     return tmp;
@@ -42,7 +44,9 @@ db_config_t wtddb_c_db_c_ftm(struct db_config data) {
 
 struct db_config wtddb_c_db_c_mtf(db_config_t data) {
     struct db_config tmp = {
-        data.write_journal
+        data.write_journal,
+        data.delete_journal,
+        data.clear_journal
     };
 
     return tmp;

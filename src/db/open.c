@@ -19,40 +19,46 @@ void wtddb_create_db(db_t* db) {
     // is currently set to, this will be important later for versioning
     db->metadata.db_ver = WTDDB_DB_VER;
     db->config.write_journal = 1;
+    db->config.delete_journal = 0;
+    db->config.clear_journal = 0;
 
     // Push the changes to the file
     wtddb_push_db(db);
 }
 
-void wtddb_open_db(const char* path, db_t* db) {
+void wtddb_open_db(const char* path, db_t** db) {
     // Always assume that db is a NULL pointer
 
-    db = malloc(sizeof(db_t));
-    db->file_path = malloc(sizeof(&path));
-    strcpy(db->file_path, path);
-    db->stream = fopen(db->file_path, "wb+"); // wb+ means read + write with
-                                              // binary, in this context
+    *db = malloc(sizeof(db_t));
+    (*db)->file_path = malloc(strlen(path) + 1);
+    strcpy((*db)->file_path, path);
+    (*db)->stream = fopen(path, "wb+"); // wb+ means read + write with
+                                        // binary, in this context
     
     // Now to actually load the contents
-    fseek(db->stream, 0, SEEK_SET); // Send to beginning
+    fseek((*db)->stream, 0, SEEK_SET); // Send to beginning
 
     size_t read = 0;
 
     struct db_metadata tmp_metadata;
-    read = fread(&tmp_metadata, sizeof(struct db_metadata), 1, db->stream);
+    read = fread(&tmp_metadata, sizeof(tmp_metadata), 1, (*db)->stream);
 
-    // Before we go any further, check if tmp_metadata.db_ver is 0
-    if(tmp_metadata.db_ver == 0 || read == 0) {
+    // Before we go any further, check if anything is actually read
+    if(read == 0) {
         // The database isn't set up
-        wtddb_create_db(db);
+        wtddb_create_db((*db));
 
         // Simply return, wtddb_create_db will handle loading metadata into
         // memory
         return;
     }
 
+    struct db_config tmp_config;
+    read = fread(&tmp_config, sizeof(tmp_config), 1, (*db)->stream);
+
     // Convert the file data to memory data
-    db->metadata = wtddb_c_db_md_ftm(tmp_metadata);
+    (*db)->metadata = wtddb_c_db_md_ftm(tmp_metadata);
+    (*db)->config = wtddb_c_db_c_ftm(tmp_config);
 }
 
 void wtddb_close_db(db_t* db) {
@@ -61,12 +67,24 @@ void wtddb_close_db(db_t* db) {
     // undefined behaviour, as you are attempting to access memory that
     // does not exist
 
+    if(db->stream == NULL) {
+        WTDDB_WARN("Database already closed", "");
+        return;
+    }
+
+    WTDDB_INFO("Closing database", "");
+
     // Write out headers
-    wtddb_push_db(db);
+    if(wtddb_push_db(db) != 0) {
+        WTDDB_CRITICAL("Could not push headers to database", "");
+        return;
+    }
+
+    WTDDB_INFO("Closing database file and freeing memory", "");
 
     // Close file, and free memory
     fclose(db->stream);
-    free(db); // The variable db is NULL at this point
+    free(db); // The variable db is dangling, using it will cause undefined behaviour
 }
 
 int wtddb_push_db(db_t* db) {
@@ -80,7 +98,13 @@ int wtddb_push_db(db_t* db) {
     }
 
     // Write out headers
-    fseek(db->stream, 0, SEEK_SET); // Send to beginning
+
+    // Send to beginning
+    if(fseek(db->stream, 0, SEEK_SET) != 0) {
+        WTDDB_CRITICAL("File seeking failed", "");
+
+        return 1;
+    }
 
     size_t write_total = 0;
     size_t write = 0;
@@ -89,10 +113,11 @@ int wtddb_push_db(db_t* db) {
     struct db_metadata tmp_metadata = wtddb_c_db_md_mtf(db->metadata);
 
     // Write the db metadata
-    write = fwrite(&tmp_metadata, sizeof(struct db_metadata), 1, db->stream);
+    write = fwrite(&tmp_metadata, sizeof(tmp_metadata), 1, db->stream);
     write_total += write;
-    if(write == 0 || write != sizeof(struct db_metadata)) {
+    if(write == 0) {
         WTDDB_CRITICAL("Failed to write to database file, the database is now corrupted", "");
+        WTDDB_INFO("Wrote %zd elements", write_total);
 
         return 1;
     }
@@ -101,15 +126,16 @@ int wtddb_push_db(db_t* db) {
     struct db_config tmp_config = wtddb_c_db_c_mtf(db->config);
 
     // Write the db config
-    write = fwrite(&tmp_config, sizeof(struct db_config), 1, db->stream);
+    write = fwrite(&tmp_config, sizeof(tmp_config), 1, db->stream);
     write_total += write;
-    if(write == 0 || write != sizeof(struct db_config)) {
+    if(write == 0) {
         WTDDB_CRITICAL("Failed to write to database file, the database is now corrupted", "");
+        WTDDB_INFO("Wrote %zd elements", write_total);
 
         return 1;
     }
 
-    WTDDB_INFO("Wrote %zd bytes", write_total);
+    WTDDB_INFO("Wrote %zd elements", write_total);
 
     return 0;
 }
