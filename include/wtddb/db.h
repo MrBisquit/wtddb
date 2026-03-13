@@ -42,6 +42,13 @@ struct db_metadata {
 
 struct db_config {
     // Bit packing in C, the ": 1" here means only take up 1 bit
+    //
+    // For bit packing, if we didn't use bit packing, the data would look like
+    // 00000001 00000000 00000001 (3 bytes for 3 booleans)
+    // That data WITH bit packing
+    // 00000101 (1 byte for 3 booleans)
+    // That saves on potentially up to 7 bytes
+    //
     // Journals basically allow you to recover from mistakes, or corruptions
     // This simply writes to the same path, but with an additional ".jrnl" at the end,
     // this file will be deleted, or may be left depending on the below options
@@ -103,6 +110,18 @@ typedef struct db_table_metadata_t {
     uint32_t num_columns;
 } db_table_metadata_t;
 
+typedef struct db_schema_metadata_t {
+    uint32_t total_schemas;
+} db_schema_metadata_t;
+
+typedef struct db_index_metadata_t {
+    uint32_t total_indexes;
+} db_index_metadata_t;
+
+typedef struct db_tables_metadata_t {
+    uint32_t total_tables;
+} db_tables_metadata_t;
+
 typedef struct db_t {
     char* file_path;
     FILE* stream;
@@ -110,6 +129,12 @@ typedef struct db_t {
     db_metadata_t metadata;
     db_config_t config;
 } db_t;
+
+// Technically there's metadata for each table, and this is just the overall
+// metadata, providing links to all of the tables
+struct db_tables_metadata {
+    uint32_t total_tables;
+};
 
 // Functions
 // Create the database
@@ -132,6 +157,18 @@ struct db_metadata wtddb_c_db_md_mtf(db_metadata_t data); // Memory -> File
 // DB config
 db_config_t wtddb_c_db_c_ftm(struct db_config data); // File -> Memory
 struct db_config wtddb_c_db_c_mtf(db_config_t data); // Memory -> File
+
+// DB schema metadata
+db_schema_metadata_t wtddb_c_db_smd_ftm(struct db_schema_metadata data); // File -> Memory
+struct db_schema_metadata wtddb_c_db_smd_mtf(db_schema_metadata_t data); // Memory -> File
+
+// DB index metadata
+db_index_metadata_t wtddb_c_db_imd_ftm(struct db_index_metadata data); // File -> Memory
+struct db_index_metadata wtddb_c_db_imd_mtf(db_index_metadata_t data); // Memory -> File
+
+// DB tables metadata
+db_tables_metadata_t wtddb_c_db_tmd_ftm(struct db_tables_metadata data); // File -> Memory
+struct db_tables_metadata wtddb_c_db_tmd_mtf(db_tables_metadata_t data); // Memory -> File
 
 // REPL structures and functions
 typedef struct {

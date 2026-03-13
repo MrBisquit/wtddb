@@ -2,6 +2,9 @@
 #include <wtddb/db.h>
 #include <getline.h>
 
+// This file contains helper functions for the REPL (more information in main.c)
+
+// Allocates a new buffer for the REPL input
 repl_buffer_t* repl_new_buffer() {
     repl_buffer_t* buffer = malloc(sizeof(repl_buffer_t));
     if(!buffer) return NULL;
@@ -13,6 +16,7 @@ repl_buffer_t* repl_new_buffer() {
     return buffer;
 }
 
+// Attempts to read from the console to the REPL buffer
 void repl_read_input(repl_buffer_t* buffer) {
     ssize_t read = getline(&(buffer->buffer), &(buffer->buffer_length), stdin);
 
@@ -26,6 +30,7 @@ void repl_read_input(repl_buffer_t* buffer) {
     buffer->buffer[read - 1] = 0;
 }
 
+// Dumps DB information
 void repl_dump_db(db_t* db) {
     printf("======== Begin database dump ========\n");
 
