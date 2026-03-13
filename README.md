@@ -56,6 +56,13 @@ have to be moved around as much.
             </td>
         </tr>
         <tr>
+            <td></td>
+            <td>
+                These are the least likely to change, which is why they are so high up
+                in the file
+            </td>
+        </tr>
+        <tr>
             <td colspan="2">
                 Schemas
             </td>
@@ -73,6 +80,21 @@ have to be moved around as much.
             <td>
                 Contains metadata for the indexes, mainly holding information
                 about how many indexes there are
+            </td>
+        </tr>
+        <tr>
+            <td></td>
+            <td>
+                Indexes are semi-variable width, because they can be wide, but they
+                are statically sized based on the index metadata, so they are sort of
+                variable-width, while being statically sized
+            </td>
+        </tr>
+        <tr>
+            <td></td>
+            <td>
+                Indexes are allocated in chunks, rather than individually. Rather than
+                adding 1 on, it instead adds a chunk of empty indexes.
             </td>
         </tr>
         <tr>
