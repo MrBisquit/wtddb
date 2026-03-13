@@ -56,7 +56,7 @@ have to be moved around as much.
             </td>
         </tr>
         <tr>
-            <td>
+            <td colspan="2">
                 Schemas
             </td>
         </tr>
@@ -76,7 +76,7 @@ have to be moved around as much.
             </td>
         </tr>
         <tr>
-            <td>
+            <td colspan="2">
                 Indexes
             </td>
         </tr>
@@ -96,7 +96,7 @@ have to be moved around as much.
             </td>
         </tr>
         <tr>
-            <td>
+            <td colspan="2">
                 Tables
             </td>
         </tr>
