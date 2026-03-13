@@ -22,6 +22,31 @@ void wtddb_create_db(db_t* db) {
     db->config.delete_journal = 0;
     db->config.clear_journal = 0;
 
+    // Write data to the file for the first time, all of the headers
+    // will be next to one another
+
+    // Move cursor to start of file
+    fseek(db->stream, 0, SEEK_SET);
+
+    // Convert all of the data to their packed form
+    struct db_metadata          tmp_metadata            = wtddb_c_db_md_mtf(db->metadata);
+    struct db_config            tmp_config              = wtddb_c_db_c_mtf(db->config);
+    struct db_schema_metadata   tmp_schema_metadata     = wtddb_c_db_smd_mtf(db->schema_metadata);
+    struct db_indexes_metadata  tmp_indexes_metadata    = wtddb_c_db_imd_mtf(db->indexes_metadata);
+    struct db_tables_metadata   tmp_tables_metadata     = wtddb_c_db_tmd_mtf(db->tables_metadata);
+
+    // Write out the DB metadata
+    fwrite(&tmp_metadata, sizeof(tmp_metadata), 1, db->stream);
+    fwrite(&tmp_config, sizeof(tmp_config), 1, db->stream);
+    fwrite(&tmp_schema_metadata, sizeof(tmp_schema_metadata), 1, db->stream);
+    fwrite(&tmp_indexes_metadata, sizeof(tmp_indexes_metadata), 1, db->stream);
+    fwrite(&tmp_tables_metadata, sizeof(tmp_tables_metadata), 1, db->stream);
+
+    // Update positions
+    db->metadata.schema_begin = sizeof(tmp_metadata) + sizeof(tmp_config);
+    db->metadata.index_begin = db->metadata.schema_begin + sizeof(tmp_schema_metadata);
+    db->metadata.table_begin = db->metadata.index_begin + sizeof(tmp_indexes_metadata);
+
     // Push the changes to the file
     wtddb_push_db(db);
 }

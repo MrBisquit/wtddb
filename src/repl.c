@@ -32,7 +32,19 @@ void repl_read_input(repl_buffer_t* buffer) {
 
 // Dumps DB information
 void repl_dump_db(db_t* db) {
-    printf("======== Begin database dump ========\n");
+    printf("======== Begin database dump ========\n\n");
+
+    printf("Database metadata\n");
+    printf("\tDatabase version: %d\n", db->metadata.db_ver);
+    printf("\t     Table count: %d\n", db->metadata.num_tables);
+    printf("\t    Schema begin: 0x%llX\n", db->metadata.schema_begin);
+    printf("\t     Index begin: 0x%llX\n", db->metadata.index_begin);
+    printf("\t     Table begin: 0x%llX\n", db->metadata.table_begin);
+
+    printf("\nDatabase config\n");
+    printf("\t   Write journal: %d\n", db->config.write_journal);
+    printf("\t  Delete journal: %d\n", db->config.delete_journal);
+    printf("\t   Clear journal: %d\n", db->config.clear_journal);
 
     printf("\n========  End database dump  ========\n");
 }
