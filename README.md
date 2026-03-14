@@ -128,6 +128,7 @@ have to be moved around as much.
 If you delete a table that's in between 2 other tables, it can cause indexing issues,
 because the indexes need to be updated, so nothing is pointing to blank spaces.
 
+### Schemas
 <table>
     <tbody>
         <!-- Schemas -->
@@ -179,8 +180,6 @@ because the indexes need to be updated, so nothing is pointing to blank spaces.
         </tr>
     </tbody>
 </table>
-
-### Schemas
 
 ### Indexes
 
