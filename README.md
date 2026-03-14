@@ -124,3 +124,64 @@ have to be moved around as much.
         </tr>
     </tbody>
 </table>
+
+If you delete a table that's in between 2 other tables, it can cause indexing issues,
+because the indexes need to be updated, so nothing is pointing to blank spaces.
+
+<table>
+    <tbody>
+        <!-- Schemas -->
+        <tr>
+            <th colspan="2">
+                Schema section
+            </th>
+        </tr>
+        <tr>
+            <td>
+                Schema metadata header
+            </td>
+            <td>
+                Contains metadata for the schemas, mainly holding information
+                about how many schemas there are
+            </td>
+        </tr>
+        <tr>
+            <th colspan="2">
+                Schema A (Example)
+            </th>
+        </tr>
+        <tr>
+            <td>Schema head</td>
+            <td>
+                This is a small header, containing the index of the linked table,
+                and number of items
+            </td>
+        </tr>
+        <tr>
+            <td colspan="2">
+                Schema item 1
+            </td>
+        </tr>
+        <tr>
+            <td colspan="2">
+                Schema item 2
+            </td>
+        </tr>
+        <tr>
+            <td colspan="2">
+                Schema item 3
+            </td>
+        </tr>
+        <tr>
+            <td colspan="2">
+                Etc
+            </td>
+        </tr>
+    </tbody>
+</table>
+
+### Schemas
+
+### Indexes
+
+### Tables
