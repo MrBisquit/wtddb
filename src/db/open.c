@@ -84,6 +84,25 @@ void wtddb_open_db(const char* path, db_t** db) {
     // Convert the file data to memory data
     (*db)->metadata = wtddb_c_db_md_ftm(tmp_metadata);
     (*db)->config = wtddb_c_db_c_ftm(tmp_config);
+
+    // Load schema, indexes, and tables metadata
+    // Schema metadata
+    fseek((*db)->stream, (*db)->metadata.schema_begin, SEEK_SET);
+    struct db_schema_metadata tmp_schema_metadata;
+    read = fread(&tmp_schema_metadata, sizeof(tmp_schema_metadata), 1, (*db)->stream);
+    (*db)->schema_metadata = wtddb_c_db_smd_ftm(tmp_schema_metadata);
+
+    // Indexes metadata
+    fseek((*db)->stream, (*db)->metadata.index_begin, SEEK_SET);
+    struct db_indexes_metadata tmp_indexes_metadata;
+    read = fread(&tmp_indexes_metadata, sizeof(tmp_indexes_metadata), 1, (*db)->stream);
+    (*db)->indexes_metadata = wtddb_c_db_imd_ftm(tmp_indexes_metadata);
+
+    // Tables metadata
+    fseek((*db)->stream, (*db)->metadata.table_begin, SEEK_SET);
+    struct db_tables_metadata tmp_tables_metadata;
+    read = fread(&tmp_tables_metadata, sizeof(tmp_tables_metadata), 1, (*db)->stream);
+    (*db)->tables_metadata = wtddb_c_db_tmd_ftm(tmp_tables_metadata);
 }
 
 void wtddb_close_db(db_t* db) {
@@ -152,6 +171,41 @@ int wtddb_push_db(db_t* db) {
 
     // Write the db config
     write = fwrite(&tmp_config, sizeof(tmp_config), 1, db->stream);
+    write_total += write;
+    if(write == 0) {
+        WTDDB_CRITICAL("Failed to write to database file, the database is now corrupted", "");
+        WTDDB_INFO("Wrote %zd elements", write_total);
+
+        return 1;
+    }
+
+    /// @todo Write db_schema_metadata, db_indexes_metadata, and db_tables_metadata
+    // Load schema, indexes, and tables metadata
+    fseek(db->stream, db->metadata.schema_begin, SEEK_SET);
+    struct db_schema_metadata tmp_schema_metadata = wtddb_c_db_smd_mtf(db->schema_metadata);
+    write = fwrite(&tmp_schema_metadata, sizeof(tmp_schema_metadata), 1, db->stream);
+    write_total += write;
+    if(write == 0) {
+        WTDDB_CRITICAL("Failed to write to database file, the database is now corrupted", "");
+        WTDDB_INFO("Wrote %zd elements", write_total);
+
+        return 1;
+    }
+
+    fseek(db->stream, db->metadata.index_begin, SEEK_SET);
+    struct db_indexes_metadata tmp_indexes_metadata = wtddb_c_db_imd_mtf(db->indexes_metadata);
+    write = fwrite(&tmp_indexes_metadata, sizeof(tmp_indexes_metadata), 1, db->stream);
+    write_total += write;
+    if(write == 0) {
+        WTDDB_CRITICAL("Failed to write to database file, the database is now corrupted", "");
+        WTDDB_INFO("Wrote %zd elements", write_total);
+
+        return 1;
+    }
+
+    fseek(db->stream, db->metadata.table_begin, SEEK_SET);
+    struct db_tables_metadata tmp_tables_metadata = wtddb_c_db_tmd_mtf(db->tables_metadata);
+    write = fwrite(&tmp_tables_metadata, sizeof(tmp_tables_metadata), 1, db->stream);
     write_total += write;
     if(write == 0) {
         WTDDB_CRITICAL("Failed to write to database file, the database is now corrupted", "");
