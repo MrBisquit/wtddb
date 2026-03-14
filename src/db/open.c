@@ -17,10 +17,15 @@ void wtddb_create_db(db_t* db) {
 
     // Sets the db->metadata.db_ver value to be what ever the WTDDB_DB_VER
     // is currently set to, this will be important later for versioning
+    db->metadata.num_tables = 0;
     db->metadata.db_ver = WTDDB_DB_VER;
     db->config.write_journal = 1;
     db->config.delete_journal = 0;
     db->config.clear_journal = 0;
+
+    db->schema_metadata.total_schemas = 0;
+    db->indexes_metadata.total_indexes = 0;
+    db->tables_metadata.total_tables = 0;
 
     // Write data to the file for the first time, all of the headers
     // will be next to one another
@@ -49,6 +54,7 @@ void wtddb_create_db(db_t* db) {
 
     // Push the changes to the file
     wtddb_push_db(db);
+    wtddb_schemas_load_all(&db);
 }
 
 void wtddb_open_db(const char* path, db_t** db) {
@@ -103,6 +109,15 @@ void wtddb_open_db(const char* path, db_t** db) {
     struct db_tables_metadata tmp_tables_metadata;
     read = fread(&tmp_tables_metadata, sizeof(tmp_tables_metadata), 1, (*db)->stream);
     (*db)->tables_metadata = wtddb_c_db_tmd_ftm(tmp_tables_metadata);
+
+    // Load schemas
+    if(wtddb_schemas_load_all(db) == 0) {
+        WTDDB_INFO("Successfully loaded %d schemas", (*db)->num_schemas_loaded);
+    } else {
+        WTDDB_CRITICAL("Could not load schemas", "");
+
+        return;
+    }
 }
 
 void wtddb_close_db(db_t* db) {
@@ -123,6 +138,12 @@ void wtddb_close_db(db_t* db) {
         WTDDB_CRITICAL("Could not push headers to database", "");
         return;
     }
+
+    WTDDB_INFO("Pushing and unloading schemas", "");
+    if(wtddb_schemas_save_all(db) != 0) {
+        WTDDB_ERROR("Could not push schemas to database, schemas may now be out of sync", "");
+    }
+    wtddb_schemas_unload_all(db);
 
     WTDDB_INFO("Closing database file and freeing memory", "");
 

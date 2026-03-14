@@ -48,6 +48,10 @@ int main(int argc, char* const argv[]) {
                 WTDDB_INFO("Dumping database information\n", "");
 
                 repl_dump_db(db);
+            } else if(strcmp(input_buffer->buffer, ".info raw") == 0) {
+                WTDDB_INFO("Dumping raw database information\n", "");
+
+                repl_dump_db_raw(db);
             } else {
                 WTDDB_ERROR("Unrecognised command \"%s\"", input_buffer->buffer);
             }

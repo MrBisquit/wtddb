@@ -6,6 +6,8 @@
 #include <getline.h> // For ssize_t
 //#include <ansi_console_v2.h> // For ANSI colours
 
+#include <wtddb/schemas.h>
+
 // Definitions
 #define WTDDB_DB_VER                        1    // Something that isn't 1,
                                                  // this will be important later
@@ -132,6 +134,9 @@ typedef struct db_t {
     db_schema_metadata_t schema_metadata;
     db_indexes_metadata_t indexes_metadata;
     db_tables_metadata_t tables_metadata;
+
+    uint32_t num_schemas_loaded;
+    db_schema_t* schemas;
 } db_t;
 
 // Functions
@@ -178,5 +183,6 @@ typedef struct {
 repl_buffer_t* repl_new_buffer();
 void repl_read_input(repl_buffer_t* buffer);
 void repl_dump_db(db_t* db);
+void repl_dump_db_raw(db_t* db);
 
 #endif // WTDDB_DB_H
