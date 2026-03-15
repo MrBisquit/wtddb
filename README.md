@@ -31,7 +31,8 @@ in which case it probably didn't compile.
   - [ ] Removing indexes
 
 ## Useful links
-https://cstack.github.io/db_tutorial/parts/part1.html
+- https://cstack.github.io/db_tutorial/parts/part1.html
+- [Build Your Own Database (https://blog.wtdawson.info/programming/building-a-database-from-scratch-in-c-part-1)](https://go.wtdawson.info/byodb)
 
 ## Design
 Below is a table which shows the different "chunks" of the file, I tried to design the database
