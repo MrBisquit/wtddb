@@ -10,6 +10,26 @@ You will need `vcpkg` to build.
 After building, the executable should *magically* appear in the `bin` directory, unless it doesn't, and
 in which case it probably didn't compile.
 
+## Features
+- [ ] REPL
+  - [x] Basic I/O commands (E.g. `.exit`)
+  - [x] ANSI highlighting (Using [MrBisquit/ansi_console_v2](https://github.com/MrBisquit/ansi_console_v2))
+  - [ ] Parsing SQL queries
+- [ ] SQL (Using the [ISO/IEC 9075](https://en.wikipedia.org/wiki/ISO/IEC_9075) standard as a base)
+- [ ] Database internals
+  - [ ] Table schemas
+  - [ ] Table indexes
+  - [ ] Table data
+- [ ] Functionality
+  - [ ] Creating tables + schemas
+  - [ ] Deleting tables + schemas
+  - [ ] Updating table schemas
+  - [ ] Duplicating tables (with their data)
+  - [ ] Generating indexes
+  - [ ] Regenerating indexes
+  - [ ] Searching indexes
+  - [ ] Removing indexes
+
 ## Useful links
 https://cstack.github.io/db_tutorial/parts/part1.html
 
